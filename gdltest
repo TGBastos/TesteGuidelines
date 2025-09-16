@@ -1,0 +1,129 @@
+{
+  "guidelineId": "A1C_calculator.v1",
+  "inputs": [
+    {
+      "modelId": "openEHR-EHR-OBSERVATION.lab_test_a1c.v0",
+      "type": "INPUT",
+      "predicates": [],
+      "dataBindingInstances": [
+        {
+          "ioEntries": [
+            {
+              "term": "gt0003",
+              "termText": "A1C level",
+              "value": {
+                "unit": "%",
+                "magnitude": 6.0,
+                "precision": 0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "modelId": "openEHR-EHR-OBSERVATION.lab_test_glucose.v1",
+      "type": "INPUT",
+      "predicates": [],
+      "dataBindingInstances": [
+        {
+          "ioEntries": [
+            {
+              "term": "gt0005",
+              "termText": "Average blood sugar",
+              "value": {
+                "unit": "mg/dl",
+                "magnitude": 120.0,
+                "precision": 0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "outputs": [],
+  "rulesInOrderOfExecution": [],
+  "nonExecutedRules": [
+    {
+      "ruleId": "gt0010",
+      "whenStatements": [
+        {
+          "$gt0005|Average blood sugar|==null": false
+        },
+        {
+          "$gt0003|A1C level|>=5,%": true
+        },
+        {
+          "$gt0003|A1C level|<=12,%": true
+        }
+      ],
+      "thenStatements": [
+        "$gt0007|Blood sugar level|.magnitude=($gt0003.magnitude*28.7)-46.7",
+        "$gt0007|Blood sugar level|.unit='mg/dl'",
+        "$gt0007|Blood sugar level|.precision=1",
+        "$gt0008|A1C value|.magnitude=$gt0003.magnitude",
+        "$gt0008|A1C value|.precision=2",
+        "$gt0008|A1C value|.unit='%'"
+      ]
+    },
+    {
+      "ruleId": "gt0011",
+      "whenStatements": [
+        {
+          "$gt0003|A1C level|==null": false
+        },
+        {
+          "$gt0005|Average blood sugar|>=100,mg/dl": true
+        },
+        {
+          "$gt0005|Average blood sugar|<=300,mg/dl": true
+        }
+      ],
+      "thenStatements": [
+        "$gt0008|A1C value|.magnitude=($gt0005.magnitude+46.7)/28.7",
+        "$gt0008|A1C value|.unit='%'",
+        "$gt0008|A1C value|.precision=1"
+      ]
+    },
+    {
+      "ruleId": "gt0015",
+      "whenStatements": [
+        {
+          "$gt0008|A1C value|>8,%": false
+        }
+      ],
+      "thenStatements": [
+        "$gt0014|Interpretation|='Your A1C level is above 8% which is not normal. Medical science has shown that an A1C level above 8% indicates an increased risk for long-term complications. You should analyze the possibility of starting a self care plan designed to diminish and control your blood sugar. For any doubts you may need to discuss them with your doctor because this is only a rough estimation!'"
+      ]
+    },
+    {
+      "ruleId": "gt0016",
+      "whenStatements": [
+        {
+          "$gt0008|A1C value|<=8,%": false
+        },
+        {
+          "$gt0008|A1C value|>=7,%": false
+        }
+      ],
+      "thenStatements": [
+        "$gt0014|Interpretation|='You are quite close to a positive result which means you should continue working on your self-care plan designed to control your blood sugar! Your target should be to get below a 7% A1C level, so if you consider you may request help from a specialized medical professional for the steps to make. For any doubts you may need to discuss them with your doctor because this is only a rough estimation!'"
+      ]
+    },
+    {
+      "ruleId": "gt0012",
+      "whenStatements": [
+        {
+          "$gt0008|A1C value|<7,%": false
+        }
+      ],
+      "thenStatements": [
+        "$gt0014|Interpretation|='Well done! Your A1C value is at an excellent level which means your blood sugar is maintained at a proper level. However for any doubts you may need to discuss them with your doctor because this is only a rough estimation and lower levels don`t necessarily assume there is no underline condition or that there are no frequent blood sugar lows that are suggesting this result!'"
+      ]
+    }
+  ],
+  "defaultActions": [],
+  "resultDataInstances": [],
+  "preconditionEvaluations": []
+}
